@@ -7,7 +7,7 @@
 // What it does:
 //   - Before any request that carries an `x-org-id` header is sent, it fills the
 //     header with the org selected for the active environment.
-//   - If no org is selected yet, it fetches GET {{AUTH_API_URL}}/organizations with
+//   - If no org is selected yet, it fetches GET {{AUTH_API_URL}}/organizations?fields=id,name with
 //     the token from the OAuth2 auth block and shows a picker. One org = auto-pick.
 //   - Selections are stored per environment (dev / qa / prod have different orgs).
 //   - Status bar item + command palette entries to switch or clear the org.
@@ -281,7 +281,7 @@ export default function createContextualOrgPicker(context: PluginContext): Plugi
     const sendRequest = window.electron?.sendRequest;
     if (!sendRequest) throw new OrgFetchError("Voiden's request bridge isn't available.");
 
-    const url = `${base.replace(/\/+$/, "")}/organizations`;
+    const url = `${base.replace(/\/+$/, "")}/organizations?fields=id,name`;
     const res = await sendRequest(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },

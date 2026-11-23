@@ -2,7 +2,7 @@
 
 Voiden asks you to sign in when you don't have an OAuth token. This plugin adds the same kind of prompt for the **organization**. When you send a request that has an `x-org-id` header and you haven't chosen an org for the active environment yet, it:
 
-1. fetches `GET {{AUTH_API_URL}}/organizations` with your OAuth token,
+1. fetches `GET {{AUTH_API_URL}}/organizations?fields=id,name` with your OAuth token,
 2. picks the org automatically if you only have one, or shows a searchable picker if you have several,
 3. remembers your choice **for each environment** (Dev, QA and Prod are separate),
 4. sets `x-org-id` to the chosen org on that request and on every later request that has an `x-org-id` header.
