@@ -1,0 +1,15 @@
+{
+  "id": "contextual-org-picker",
+  "type": "community",
+  "name": "Contextual Org Picker",
+  "description": "Prompts you to choose a Contextual organization for the active environment and fills in the x-org-id header on every request that has one.",
+  "version": "0.3.0",
+  "author": "Contextual",
+  "enabled": true,
+  "readme": "Prototype. Picks a Contextual org per environment and sets x-org-id on outgoing requests.",
+  "priority": 50,
+  "permissions": ["settings", "commandPalette", "events"],
+  "capabilities": {
+    "pipeline": { "hooks": ["pre-send"] }
+  }
+}

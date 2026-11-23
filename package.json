@@ -1,0 +1,19 @@
+{
+  "name": "voiden-contextual-org-picker",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Voiden plugin: choose a Contextual organization per environment and fill in x-org-id.",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "rm -rf dist/build && tsc",
+    "zip": "pnpm run build && rm -rf dist/stage dist/contextual-org-picker.zip && mkdir -p dist/stage && cp manifest.json dist/build/contextual-org-picker.js dist/stage/ && cd dist/stage && zip -q -X ../contextual-org-picker.zip manifest.json contextual-org-picker.js && cd .. && rm -rf stage && echo \"Built dist/contextual-org-picker.zip\"",
+    "changeset": "changeset",
+    "version-packages": "changeset version && node scripts/sync-manifest-version.mjs"
+  },
+  "packageManager": "pnpm@12.8.1",
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "typescript": "^7.0.2"
+  }
+}

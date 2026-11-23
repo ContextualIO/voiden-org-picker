@@ -1,0 +1,76 @@
+# Release flow (Changesets):
+#   1. PRs include a changeset (`pnpm changeset`) describing the change.
+#   2. On push to main, changesets/action opens or updates a "Version Packages" PR
+#      that bumps package.json + manifest.json and writes CHANGELOG.md.
+#   3. Merging that PR leaves no pending changesets, so this workflow builds the
+#      plugin and creates GitHub release vX.Y.Z with the install assets attached.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions: {}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # version commit, tag and release
+      pull-requests: write # Version Packages PR
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4 # uses "packageManager" from package.json
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run check
+
+      - name: Create or update the Version Packages PR
+        id: changesets
+        uses: changesets/action@v2
+        with:
+          version-script: pnpm run version-packages
+          commit-message: "chore: version packages"
+          pr-title: "chore: version packages"
+
+      - name: Create GitHub release
+        if: steps.changesets.outputs.has-changesets == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          manifest_version=$(node -p "require('./manifest.json').version")
+          tag="v$version"
+
+          if [ "$version" != "$manifest_version" ]; then
+            echo "::error::package.json ($version) and manifest.json ($manifest_version) versions differ. Run 'node scripts/sync-manifest-version.mjs'."
+            exit 1
+          fi
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists; nothing to do."
+            exit 0
+          fi
+
+          pnpm run zip
+          node scripts/release-notes.mjs > "$RUNNER_TEMP/notes.md"
+
+          gh release create "$tag" \
+            --target "$GITHUB_SHA" \
+            --title "$tag" \
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            manifest.json \
+            dist/build/contextual-org-picker.js \
+            dist/contextual-org-picker.zip
