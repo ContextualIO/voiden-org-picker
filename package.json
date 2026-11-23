@@ -1,6 +1,6 @@
 {
   "name": "voiden-contextual-org-picker",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "description": "Voiden plugin: choose a Contextual organization per environment and fill in x-org-id.",
